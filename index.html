@@ -41,44 +41,44 @@
         <button id="increaseSize">Increase Size</button>
         <button id="decreaseSize">Decrease Size</button>
         <button id="restart">Restart</button>
-        <button id="reset">Reset</button> <!-- Reset Button -->
+        <button id="reset">Reset</button> 
     </div>
     <div id="counter">
         <span id="leftCount">Left: 0</span> | <span id="rightCount">Right: 0</span>
     </div>
 
     <script>
-        // Set up the canvas
+
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
 
-        // Set canvas size
+
         canvas.width = 500;
         canvas.height = 500;
 
-        // Default values for balls
+
         const defaultRadius = 15;
         const defaultSpeed = 3;
         
-        // Ball properties
-        const balls = [];
-        let isRunning = true;  // Flag to control if balls are moving or not
 
-        // Function to create a new ball
+        const balls = [];
+        let isRunning = true;  
+
+ 
         function createBall() {
             const ball = {
-                x: Math.random() * (canvas.width - 30) + 15, // Random x position
-                y: Math.random() * (canvas.height - 30) + 15, // Random y position
-                radius: defaultRadius,  // Default radius
-                dx: (Math.random() * defaultSpeed) + 2, // Default speed in X direction
-                dy: (Math.random() * defaultSpeed) + 2, // Default speed in Y direction
-                color: `hsl(${Math.random() * 360}, 100%, 50%)` // Random color
+                x: Math.random() * (canvas.width - 30) + 15, 
+                y: Math.random() * (canvas.height - 30) + 15,
+                radius: defaultRadius,  
+                dx: (Math.random() * defaultSpeed) + 2, 
+                dy: (Math.random() * defaultSpeed) + 2, 
+                color: `hsl(${Math.random() * 360}, 100%, 50%)` 
             };
             balls.push(ball);
-            updateCounter(); // Update counter after adding a ball
+            updateCounter(); 
         }
 
-        // Function to draw a ball
+
         function drawBall(ball) {
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -87,13 +87,12 @@
             ctx.closePath();
         }
 
-        // Function to draw the grid
+
         function drawGrid() {
             const gridSize = 50;
             ctx.strokeStyle = "#ccc";
             ctx.lineWidth = 0.5;
 
-            // Vertical lines
             for (let x = 0; x < canvas.width; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
@@ -102,7 +101,7 @@
                 ctx.closePath();
             }
 
-            // Horizontal lines
+
             for (let y = 0; y < canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -112,69 +111,61 @@
             }
         }
 
-        // Function to update the ball positions
+ 
         function updateBallPositions() {
             balls.forEach((ball, index) => {
-                if (!isRunning) return;  // Stop the movement if isRunning is false
+                if (!isRunning) return;  
 
-                // Update position
+ 
                 ball.x += ball.dx;
                 ball.y += ball.dy;
 
-                // Ensure the ball doesn't clip into the wall (check boundaries)
+             
                 if (ball.x - ball.radius < 0) {
-                    ball.x = ball.radius;  // Prevent clipping into the left wall
-                    ball.dx = -ball.dx;    // Reverse direction on X axis
+                    ball.x = ball.radius; 
+                    ball.dx = -ball.dx;    
                 } else if (ball.x + ball.radius > canvas.width) {
-                    ball.x = canvas.width - ball.radius; // Prevent clipping into the right wall
-                    ball.dx = -ball.dx;    // Reverse direction on X axis
+                    ball.x = canvas.width - ball.radius; 
+                    ball.dx = -ball.dx;   
                 }
 
                 if (ball.y - ball.radius < 0) {
-                    ball.y = ball.radius;  // Prevent clipping into the top wall
-                    ball.dy = -ball.dy;    // Reverse direction on Y axis
+                    ball.y = ball.radius;  
+                    ball.dy = -ball.dy;    
                 } else if (ball.y + ball.radius > canvas.height) {
-                    ball.y = canvas.height - ball.radius; // Prevent clipping into the bottom wall
-                    ball.dy = -ball.dy;    // Reverse direction on Y axis
+                    ball.y = canvas.height - ball.radius; 
+                    ball.dy = -ball.dy;   
                 }
 
-                // Check for collision with other balls
                 for (let j = index + 1; j < balls.length; j++) {
                     const otherBall = balls[j];
                     const dx = ball.x - otherBall.x;
                     const dy = ball.y - otherBall.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // If the balls are touching or overlapping
                     if (distance < ball.radius + otherBall.radius) {
-                        // Handle the bounce (elastic collision)
+
                         const angle = Math.atan2(dy, dx);
                         const sine = Math.sin(angle);
                         const cosine = Math.cos(angle);
 
-                        // Rotate ball positions to 1D
                         const x1 = 0;
                         const y1 = 0;
                         const x2 = dx * cosine + dy * sine;
                         const y2 = dy * cosine - dx * sine;
 
-                        // Rotate velocities
                         const vx1 = ball.dx * cosine + ball.dy * sine;
                         const vy1 = ball.dy * cosine - ball.dx * sine;
                         const vx2 = otherBall.dx * cosine + otherBall.dy * sine;
                         const vy2 = otherBall.dy * cosine - otherBall.dx * sine;
 
-                        // Exchange velocities in 1D
                         const finalVx1 = ((ball.radius - otherBall.radius) * vx1 + (otherBall.radius + otherBall.radius) * vx2) / (ball.radius + otherBall.radius);
                         const finalVx2 = ((ball.radius + ball.radius) * vx1 + (otherBall.radius - ball.radius) * vx2) / (ball.radius + otherBall.radius);
-
-                        // Update positions in 2D
+                        
                         ball.dx = finalVx1 * cosine - vy1 * sine;
                         ball.dy = vy1 * cosine + finalVx1 * sine;
                         otherBall.dx = finalVx2 * cosine - vy2 * sine;
                         otherBall.dy = vy2 * cosine + finalVx2 * sine;
-
-                        // Separate the balls so they no longer overlap
                         const overlap = (ball.radius + otherBall.radius) - distance;
                         ball.x += Math.cos(angle) * overlap / 2;
                         ball.y += Math.sin(angle) * overlap / 2;
@@ -184,23 +175,18 @@
                 }
             });
         }
-
-        // Function to clear the canvas and redraw everything
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-            drawGrid(); // Draw the grid
-            balls.forEach(drawBall); // Draw each ball
-            updateBallPositions(); // Update each ball's position
-            updateCounter(); // Update the counter
-            requestAnimationFrame(draw); // Continue the animation
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid(); 
+            balls.forEach(drawBall); 
+            updateBallPositions(); 
+            updateCounter(); 
+            requestAnimationFrame(draw); 
         }
-
-        // Function to update the counter
         function updateCounter() {
             let leftCount = 0;
             let rightCount = 0;
 
-            // Count balls on the left and right side
             balls.forEach(ball => {
                 if (ball.x < canvas.width / 2) {
                     leftCount++;
@@ -208,92 +194,69 @@
                     rightCount++;
                 }
             });
-
-            // Update the counter display
             document.getElementById("leftCount").textContent = `Left: ${leftCount}`;
             document.getElementById("rightCount").textContent = `Right: ${rightCount}`;
 
-            // If either side has 0 balls, stop the movement
             if (leftCount === 0 || rightCount === 0) {
-                isRunning = false; // Stop the movement of balls
+                isRunning = false; 
             }
         }
-
-        // Function to add a ball
         document.getElementById('addBall').addEventListener('click', () => {
             createBall();
         });
-
-        // Function to remove a ball
         document.getElementById('removeBall').addEventListener('click', () => {
             if (balls.length > 0) {
-                balls.pop(); // Remove the last ball in the array
-                updateCounter(); // Update the counter after removal
+                balls.pop(); 
+                updateCounter(); 
             }
         });
-
-        // Function to increase speed
         document.getElementById('increaseSpeed').addEventListener('click', () => {
             balls.forEach(ball => {
-                ball.dx *= 1.2;  // Increase the speed by 20%
+                ball.dx *= 1.2;  
                 ball.dy *= 1.2;
             });
         });
-
-        // Function to decrease speed
         document.getElementById('decreaseSpeed').addEventListener('click', () => {
             balls.forEach(ball => {
-                ball.dx *= 0.8;  // Decrease the speed by 20%
+                ball.dx *= 0.8;  
                 ball.dy *= 0.8;
             });
         });
-
-        // Function to increase size
         document.getElementById('increaseSize').addEventListener('click', () => {
             balls.forEach(ball => {
-                ball.radius *= 1.2;  // Increase the size by 20%
+                ball.radius *= 1.2; 
             });
         });
-
-        // Function to decrease size
         document.getElementById('decreaseSize').addEventListener('click', () => {
             balls.forEach(ball => {
-                ball.radius *= 0.8;  // Decrease the size by 20%
+                ball.radius *= 0.8;  
             });
         });
-
-        // Function to restart the animation and move balls to random positions
         document.getElementById('restart').addEventListener('click', () => {
-            // Move each ball to a random position
+
             balls.forEach(ball => {
                 ball.x = Math.random() * (canvas.width - 2 * ball.radius) + ball.radius;
                 ball.y = Math.random() * (canvas.height - 2 * ball.radius) + ball.radius;
             });
-            isRunning = true; // Restart the movement of balls
-            updateCounter(); // Recheck the counter after restart
+            isRunning = true; 
+            updateCounter(); 
         });
-
-        // Function to reset all settings
         document.getElementById('reset').addEventListener('click', () => {
-            // Reset balls
-            balls.length = 0;
-            createBall(); // Start with one ball
 
-            // Reset ball properties
+            balls.length = 0;
+            createBall(); 
             balls.forEach(ball => {
                 ball.radius = defaultRadius;
                 ball.dx = defaultSpeed;
                 ball.dy = defaultSpeed;
             });
 
-            // Reset the speed, size, and ball count
-            updateCounter(); // Update the counter display
+            updateCounter();
         });
-
-        // Start the animation with at least one ball
         createBall();
         draw();
     </script>
 
 </body>
 </html>
+
